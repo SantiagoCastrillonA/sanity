@@ -1,7 +1,11 @@
 const express = require("express");
-const mysql = require("mysql2");
 const cors = require("cors");
 require("dotenv").config();
+
+// Importar Sequelize y modelos
+const { testConnection, syncDatabase } = require("./models");
+// Importar rutas
+const apiRoutes = require("./routes/api");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -10,23 +14,24 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Configuración de la base de datos
-const db = mysql.createConnection({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "sanity",
-  port: process.env.DB_PORT || 3306,
-});
+// Función para inicializar la base de datos
+const initializeDatabase = async () => {
+  try {
+    await testConnection();
+    await syncDatabase(false); // false para no recrear las tablas
 
-// Conectar a la base de datos
-db.connect((err) => {
-  if (err) {
-    console.error("Error conectando a la base de datos:", err);
+    // Ejecutar seeders solo en desarrollo
+    if (process.env.NODE_ENV !== "production") {
+      const { seedActivities } = require("./seeders/activitySeeder");
+      await seedActivities();
+    }
+
+    console.log("🚀 Base de datos inicializada correctamente");
+  } catch (error) {
+    console.error("❌ Error inicializando la base de datos:", error);
     process.exit(1);
   }
-  console.log("✅ Conectado a la base de datos MySQL");
-});
+};
 
 // Ruta de prueba
 app.get("/", (req, res) => {
@@ -36,80 +41,24 @@ app.get("/", (req, res) => {
 });
 
 // Ruta para probar la conexión a la base de datos
-app.get("/api/test-db", (req, res) => {
-  db.query("SELECT 1 + 1 as result", (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: "Error en la base de datos" });
-    }
+app.get("/api/test-db", async (req, res) => {
+  try {
+    const { sequelize } = require("./models");
+    await sequelize.authenticate();
     res.json({
-      message: "Conexión a la base de datos exitosa",
-      result: results[0].result,
+      message: "Conexión a la base de datos exitosa con Sequelize",
+      timestamp: new Date().toISOString(),
     });
-  });
-});
-
-// Rutas para el diario emocional
-app.post("/api/analyze-emotion", (req, res) => {
-  const { message, userId } = req.body;
-
-  // Aquí implementarás la lógica de análisis emocional con IA
-  // Por ahora, una respuesta simple
-  const emotion = analyzeEmotion(message);
-
-  // Guardar en la base de datos
-  const query =
-    "INSERT INTO diary_entries (user_id, message, emotion, created_at) VALUES (?, ?, ?, NOW())";
-  db.query(query, [userId || 1, message, emotion], (err, result) => {
-    if (err) {
-      console.error("Error guardando entrada del diario:", err);
-      return res.status(500).json({ error: "Error guardando entrada" });
-    }
-
-    const response = generateEmotionalResponse(emotion);
-    res.json({
-      response,
-      emotion,
-      activities: getRecommendedActivities(emotion),
-      entryId: result.insertId,
+  } catch (error) {
+    res.status(500).json({
+      error: "Error en la base de datos",
+      details: error.message,
     });
-  });
+  }
 });
 
-// Ruta para obtener entradas del diario
-app.get("/api/diary-entries/:userId", (req, res) => {
-  const { userId } = req.params;
-
-  const query =
-    "SELECT * FROM diary_entries WHERE user_id = ? ORDER BY created_at DESC LIMIT 20";
-  db.query(query, [userId], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: "Error obteniendo entradas" });
-    }
-    res.json(results);
-  });
-});
-
-// Ruta para contacto de emergencia
-app.post("/api/emergency-contact", (req, res) => {
-  const { userId } = req.body;
-
-  // Registrar la emergencia
-  const query =
-    "INSERT INTO emergency_contacts (user_id, contacted_at) VALUES (?, NOW())";
-  db.query(query, [userId], (err, result) => {
-    if (err) {
-      console.error("Error registrando emergencia:", err);
-    }
-  });
-
-  res.json({
-    message: "Contacto de emergencia activado",
-    emergencyNumbers: [
-      { name: "Línea de Crisis", number: "106" },
-      { name: "Emergencias", number: "123" },
-    ],
-  });
-});
+// Usar las rutas de la API
+app.use("/api", apiRoutes);
 
 // Funciones auxiliares (simplificadas por ahora)
 function analyzeEmotion(message) {
@@ -197,8 +146,9 @@ function getRecommendedActivities(emotion) {
   return activities[emotion] || activities.neutral;
 }
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
+  await initializeDatabase();
 });
 
 module.exports = app;

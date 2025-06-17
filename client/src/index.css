@@ -1,1 +1,30 @@
 @import "tailwindcss";
+
+@font-face {
+    font-family: 'Raleway';
+    src: url('./assets/fonts/Raleway-VariableFont_wght.woff2') format('woff2-variations');
+    font-weight: 100 900;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nunito';
+    src: url('./assets/fonts/Nunito-VariableFont_wght.woff2') format('woff2-variations');
+    font-weight: 200 1000;
+    font-display: swap;
+}
+
+@theme{
+
+    /* Colores */
+    --color-bg-primary: #CAE8F6;
+    --color-bg-secondary: #F8EAEE;
+    --color-bg-thrid: #CAE4F3;
+    --color-primary: #4D90A4;
+    --color-secondary: #FFBBB4;
+
+
+    /* fuentes */
+    --font-sanity: 'Raleway', system-ui, sans-serif;
+    --font-body-sanity: 'Nunito', system-ui, sans-serif;
+}

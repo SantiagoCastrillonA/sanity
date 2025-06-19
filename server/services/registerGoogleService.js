@@ -26,12 +26,12 @@ const googleSignUp = async ({ idToken, accountType }) => {
     const payload = ticket.getPayload();
     const googleId = payload['sub'];
     const email = payload['email'];
-    const nombres = payload['given_name'] || payload['name'];
-    const apellidos = payload['family_name'] || '';
-    let foto_perfil = payload['picture'];
+    const givenName = payload['given_name'] || payload['name'];
+    const familyName = payload['family_name'] || '';
+    let pictureUrl = payload['picture'];
     const emailVerified = payload['email_verified'];
-    if (foto_perfil && foto_perfil.includes('googleusercontent.com')) {
-        foto_perfil = foto_perfil.split('=')[0];
+    if (pictureUrl && pictureUrl.includes('googleusercontent.com')) {
+        pictureUrl = pictureUrl.split('=')[0];
     }
     if (!emailVerified) {
         const error = new Error('El correo electrónico de Google no está verificado.');
@@ -47,11 +47,11 @@ const googleSignUp = async ({ idToken, accountType }) => {
     const user = await dbInstance.User.create({
         googleId,
         email,
-        nombres,
-        apellidos,
-        foto_perfil,
+        names: givenName,
+        lastnames: familyName,
+        profile_pick: pictureUrl,
         accountType,
-        verificacion_email: true,
+        verify_email: true,
         password: null,
     });
     const token = jwt.sign(
@@ -65,10 +65,11 @@ const googleSignUp = async ({ idToken, accountType }) => {
             id: user.id,
             googleId: user.googleId,
             email: user.email,
-            nombres: user.nombres,
-            apellidos: user.apellidos,
-            foto_perfil: user.foto_perfil,
+            names: user.names,
+            lastnames: user.lastnames,
+            profile_pick: user.profile_pick,
             accountType: user.accountType,
+            verify_email: user.verify_email,
         }
     };
 };

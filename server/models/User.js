@@ -9,10 +9,7 @@ const User = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    name: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
+  
     email: {
       type: DataTypes.STRING(255),
       allowNull: false,
@@ -21,9 +18,35 @@ const User = sequelize.define(
         isEmail: true,
       },
     },
+    googleId: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      unique: true,
+    },
+    names: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    lastnames: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    profile_pick: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+    accountType: {
+      type: DataTypes.ENUM('Usuario', 'Profesional'),
+      allowNull: true,
+    },
+    verify_email: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+    },
     password: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     phone: {
       type: DataTypes.STRING(20),

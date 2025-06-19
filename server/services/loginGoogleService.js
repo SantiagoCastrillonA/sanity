@@ -26,12 +26,12 @@ const googleSignIn = async ({ idToken }) => {
     const payload = ticket.getPayload();
     const googleId = payload['sub'];
     const email = payload['email'];
-    const nombres = payload['given_name'] || payload['name'];
-    const apellidos = payload['family_name'] || '';
-    let foto_perfil = payload['picture'];
+    const givenName = payload['given_name'] || payload['name'];
+    const familyName = payload['family_name'] || '';
+    let pictureUrl = payload['picture'];
     const emailVerified = payload['email_verified'];
-    if (foto_perfil && foto_perfil.includes('googleusercontent.com')) {
-        foto_perfil = foto_perfil.split('=')[0];
+    if (pictureUrl && pictureUrl.includes('googleusercontent.com')) {
+        pictureUrl = pictureUrl.split('=')[0];
     }
     if (!emailVerified) {
         const error = new Error('El correo electrónico de Google no está verificado.');
@@ -44,10 +44,10 @@ const googleSignIn = async ({ idToken }) => {
         if (user) {
             await user.update({
                 googleId,
-                nombres,
-                apellidos,
-                foto_perfil,
-                verificacion_email: true,
+                names: givenName,
+                lastnames: familyName,
+                profile_pick: pictureUrl,
+                verify_email: true,
             });
         } else {
             const error = new Error('Correo no registrado');
@@ -56,10 +56,10 @@ const googleSignIn = async ({ idToken }) => {
         }
     } else {
         await user.update({
-            nombres,
-            apellidos,
-            foto_perfil,
-            verificacion_email: true,
+            names: givenName,
+            lastnames: familyName,
+            profile_pick: pictureUrl,
+            verify_email: true,
         });
     }
     const token = jwt.sign(
@@ -73,10 +73,11 @@ const googleSignIn = async ({ idToken }) => {
             id: user.id,
             googleId: user.googleId,
             email: user.email,
-            nombres: user.nombres,
-            apellidos: user.apellidos,
-            foto_perfil: user.foto_perfil,
+            names: user.names,
+            lastnames: user.lastnames,
+            profile_pick: user.profile_pick,
             accountType: user.accountType,
+            verify_email: user.verify_email,
         }
     };
 };

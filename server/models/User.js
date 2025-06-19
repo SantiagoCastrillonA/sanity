@@ -13,28 +13,25 @@ const User = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: false,
     },
+    username: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      unique: true,
+    },
     email: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(100),
       allowNull: false,
       unique: true,
       validate: {
         isEmail: true,
       },
     },
-    password: {
+    password_hash: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },
-    phone: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
-    emergency_contact_name: {
+    full_name: {
       type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    emergency_contact_phone: {
-      type: DataTypes.STRING(20),
       allowNull: true,
     },
     created_at: {

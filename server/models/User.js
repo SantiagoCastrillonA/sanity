@@ -1,57 +1,30 @@
+// models/User.js
 const { DataTypes } = require("sequelize");
-const { sequelize } = require("../config/sequelize");
+const sequelize = require("../config/sequelize");
 
-const User = sequelize.define(
-  "User",
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    name: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    email: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-      unique: true,
-      validate: {
-        isEmail: true,
-      },
-    },
-    password: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    phone: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
-    emergency_contact_name: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-    },
-    emergency_contact_phone: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
+const User = sequelize.define("User", {
+  username: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    unique: true,
   },
-  {
-    tableName: "users",
-    timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-  }
-);
+  email: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    unique: true,
+  },
+  password_hash: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+  },
+  full_name: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+  },
+}, {
+  tableName: "users",
+  createdAt: "created_at",
+  updatedAt: "updated_at",
+});
 
 module.exports = User;

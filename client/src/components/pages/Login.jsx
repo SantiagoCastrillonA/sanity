@@ -6,6 +6,7 @@ import hidePassword from '../../assets/Icons/ojos-cruzados.png'
 import React, { useState } from "react";
 import { GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "./../../config/axiosInstance";
 
 export const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -148,7 +149,7 @@ export const LoginPage = () => {
                     </div>
                     <div>
                         <button class="bg-secondary rounded-4xl w-auto h-auto py-3 px-6 my-4 font-sanity
-                        text-neutral-50 text-3xl" OnClick={login}>Iniciar Sesión</button>
+                        text-neutral-50 text-3xl" onClick={login}>Iniciar Sesión</button>
                         <p class="font-body-sanity flex gap-2 items-center justify-center">¿Primera vez? <a href="/register" class="text-primary hover:underline">Registrarse</a></p>
                         <p>o</p>
                         <div class="flex items-center justify-center mt-4">

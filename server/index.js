@@ -1,52 +1,67 @@
 const express = require("express");
 const cors = require("cors");
+const initializeDatabase = require("./models/index");
 require("dotenv").config();
 
-// Importar Sequelize y modelos
-const { testConnection, syncDatabase } = require("./models");
 
 // Importar rutas
 const userRoutes = require("./routes/userRoutes");
 
-// Importar controladores
-const { setDb: setLoginDb } = require('./controllers/loginGoogleController');
-const { setDb: setRegisterDb } = require('./controllers/registerGoogleController');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+
+const allowedOrigins = [
+  "http://localhost:5173",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Permitir solicitudes sin origin (como Postman) o desde orígenes permitidos
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("No permitido por CORS"));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  })
+);
+
 
 // Middleware
-app.use(cors());
 app.use(express.json());
 
 // Registrar rutas
 app.use("/api/users", userRoutes);
 
 // Función para inicializar la base de datos
-const initializeDatabase = async () => {
+const startServer = async () => {
   try {
-    await testConnection();
-    await syncDatabase(false); // false para no recrear las tablas
 
-    // Ejecutar seeders solo en desarrollo
-    if (process.env.NODE_ENV !== "production") {
-      const { seedActivities } = require("./seeders/activitySeeder");
-      await seedActivities();
-    }
+    const db = await initializeDatabase();
 
-    console.log("🚀 Base de datos inicializada correctamente");
+    // Inyectar la instancia de la base de datos en los controladores y servicios
+    const loginGoogleController = require('./controllers/loginGoogleController');
+    const registerGoogleController = require('./controllers/registerGoogleController');
+    const loginGoogleService = require('./services/loginGoogleService');
+    const registerGoogleService = require('./services/registerGoogleService');
+
+    loginGoogleController.setDb(db);
+    registerGoogleController.setDb(db);
+    loginGoogleService.setDb(db);
+    registerGoogleService.setDb(db);
+
+    const PORT = process.env.PORT || 3001;
+    app.listen(PORT, () => {
+      console.log("🚀 Servidor corriendo en el puerto", PORT);
+    });
   } catch (error) {
     console.error("❌ Error inicializando la base de datos:", error);
     process.exit(1);
   }
 };
 
-
-app.listen(PORT, async () => {
-  console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
-  const dbInstance = await initializeDatabase();
-  setLoginDb(dbInstance);
-  setRegisterDb(dbInstance);
-});
-
-module.exports = app;
+startServer();

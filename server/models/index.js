@@ -1,60 +1,82 @@
-const { sequelize } = require("../config/sequelize");
+const { Sequelize } = require("sequelize");
+const createDatabaseIfNotExists = require("../config/database");
 
 // Importar modelos
 const User = require("./User");
-const DiaryEntry = require("./DiaryEntry");
 const Activity = require("./Activity");
+const DiaryEntry = require("./DiaryEntry");
 const EmergencyLog = require("./EmergencyLog");
 
-// Función para probar la conexión
-const testConnection = async () => {
+// Leer la URL de conexión (recomendada en producción)
+const DB_URL = process.env.DB_URL;
+
+// Alternativamente, datos individuales (útiles en desarrollo local)
+const DB_NAME = process.env.DB_NAME || "Sanity";
+const DB_USER = process.env.DB_USER || "root";
+const DB_PORT = process.env.DB_PORT || 3306; // Puerto por defecto de MySQL
+const DB_PASSWORD = process.env.DB_PASSWORD || "";
+const DB_HOST = process.env.DB_HOST || "localhost";
+
+async function initializeDatabase() {
+  let sequelize;
+
+  if (DB_URL) {
+    // Producción o conexión directa
+    sequelize = new Sequelize(DB_URL, {
+      dialect: "mysql",
+      dialectOptions: {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      },
+      logging: false,
+    });
+  } else {
+    // Desarrollo local: crear base de datos si no existe
+    await createDatabaseIfNotExists();
+
+    sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
+      host: DB_HOST,
+      dialect: "mysql",
+      port: DB_PORT,
+      logging: false,
+    });
+  }
+
   try {
     await sequelize.authenticate();
-    console.log("✅ Conexión a la base de datos establecida correctamente.");
+    console.log("✅ Conectado a la base de datos con Sequelize.");
   } catch (error) {
     console.error("❌ No se pudo conectar a la base de datos:", error);
-    throw error;
+    process.exit(1);
   }
-};
 
-// Definir asociaciones
-User.hasMany(DiaryEntry, {
-  foreignKey: "user_id",
-  as: "diaryEntries",
-});
+  // Inicializar modelos con instancia de sequelize
+  User.init(sequelize);
+  Activity.init(sequelize);
+  DiaryEntry.init(sequelize);
+  EmergencyLog.init(sequelize);
 
-DiaryEntry.belongsTo(User, {
-  foreignKey: "user_id",
-  as: "user",
-});
+  // Asociar modelos
+  const models = {
+    User,
+    Activity,
+    DiaryEntry,
+    EmergencyLog
+  };
 
-User.hasMany(EmergencyLog, {
-  foreignKey: "user_id",
-  as: "emergencyLogs",
-});
+  Object.values(models).forEach((model) => {
+    if (model.associate) model.associate(models);
+  });
 
-EmergencyLog.belongsTo(User, {
-  foreignKey: "user_id",
-  as: "user",
-});
+  // Sincronizar tablas
+  await sequelize.sync({ force: false });
+  console.log("📂 Tablas sincronizadas con la base de datos.");
 
-// Función para sincronizar la base de datos
-const syncDatabase = async (force = false) => {
-  try {
-    await sequelize.sync({ force });
-    console.log("✅ Base de datos sincronizada correctamente");
-  } catch (error) {
-    console.error("❌ Error al sincronizar la base de datos:", error);
-    throw error;
-  }
-};
+  return {
+    sequelize,
+    ...models
+  };
+}
 
-module.exports = {
-  sequelize,
-  User,
-  DiaryEntry,
-  Activity,
-  EmergencyLog,
-  syncDatabase,
-  testConnection,
-};
+module.exports = initializeDatabase;

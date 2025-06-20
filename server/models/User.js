@@ -23,12 +23,8 @@ class User extends Model {
           allowNull: true,
           unique: true,
         },
-        names: {
-          type: DataTypes.STRING(100),
-          allowNull: true,
-        },
-        lastnames: {
-          type: DataTypes.STRING(100),
+        full_name: {
+          type: DataTypes.STRING(200),
           allowNull: true,
         },
         profile_pick: {

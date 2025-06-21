@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const { sequelize } = require("../config/sequelize");
+const sequelize = require("../config/sequelize"); // ← SIN llaves {}
 
 const DiaryEntry = sequelize.define(
   "DiaryEntry",
@@ -17,37 +17,25 @@ const DiaryEntry = sequelize.define(
         key: "id",
       },
     },
+    title: {
+      type: DataTypes.STRING(200),
+      allowNull: false,
+    },
     content: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    emotion_detected: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-    },
     mood_score: {
-      type: DataTypes.DECIMAL(3, 2),
-      allowNull: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
       validate: {
-        min: 0,
+        min: 1,
         max: 10,
       },
     },
-    ai_response: {
-      type: DataTypes.TEXT,
+    tags: {
+      type: DataTypes.JSON,
       allowNull: true,
-    },
-    entry_date: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
     },
   },
   {

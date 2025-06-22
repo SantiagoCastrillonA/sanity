@@ -1,31 +1,26 @@
-let dbInstance;
 const registerService = require("../services/registerService");
 
 const setDb = (database) => {
-  dbInstance = database;
+  registerService.setDb(database);
 };
 
 const register = async (req, res) => {
   try {
-    if (!dbInstance || !dbInstance.User) {
-      return res.status(500).json({
-        success: false,
-        message: "El servidor no está completamente inicializado."
-      });
-    }
-
     const userData = req.body;
-    const result = await registerService.registerUser(dbInstance, userData);
+    const result = await registerService.registerUser(userData);
     res.status(200).json({
       success: true,
-      message: "Usuario registrado exitosamente",
+      message: result.message || "Usuario registrado exitosamente",
       user: result.user,
       token: result.token
     });
   } catch (error) {
-    handleError(error, res);
+    console.error('Error en register controller:', error);
+    res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Error interno del servidor al registrar usuario'
+    });
   }
 };
-
 
 module.exports = { register, setDb }; 

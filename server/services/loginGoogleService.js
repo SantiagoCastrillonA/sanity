@@ -64,7 +64,7 @@ const googleSignIn = async ({ idToken }) => {
     }
     const token = jwt.sign(
         { id: user.id, email: user.email, accountType: user.accountType },
-        process.env.JWT_SECRET || "secret",
+        process.env.JWT_SECRET || "sanity_app_2024_jwt_secret_key_fallback",
         { expiresIn: "1h" }
     );
     return {

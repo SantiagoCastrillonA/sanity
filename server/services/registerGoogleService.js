@@ -8,7 +8,12 @@ const setDb = (databaseInstance) => {
     dbInstance = databaseInstance;
 };
 
-const googleSignUp = async ({ idToken, accountType }) => {
+const googleSignUp = async ({ idToken, accountType, servicios_especialistas, NC_profesional, certificados, experiencia_laboral }) => {
+    if (!dbInstance || !dbInstance.User) {
+        const error = new Error('El servidor no está completamente inicializado.');
+        error.status = 500;
+        throw error;
+    }
     if (!idToken) {
         const error = new Error('No se proporcionó token de Google.');
         error.status = 400;
@@ -54,9 +59,30 @@ const googleSignUp = async ({ idToken, accountType }) => {
         verify_email: true,
         password: null,
     });
+
+    // Si es profesional, crear perfil profesional
+    let professionalProfile = null;
+    if (accountType === 'Profesional') {
+        try {
+            professionalProfile = await dbInstance.Professional.create({
+                user_id: user.id,
+                servicios_especialistas: servicios_especialistas || null,
+                NC_profesional: NC_profesional || null,
+                certificados: certificados || null,
+                experiencia_laboral: experiencia_laboral || null,
+            });
+            console.log("Perfil profesional creado (Google):", professionalProfile.id);
+        } catch (error) {
+            console.error("Error creando perfil profesional (Google):", error);
+            // Si falla la creación del perfil profesional, eliminar el usuario creado
+            await user.destroy();
+            throw new Error("Error al crear perfil profesional. Por favor, intente nuevamente.");
+        }
+    }
+
     const token = jwt.sign(
         { id: user.id, email: user.email, accountType: user.accountType },
-        process.env.JWT_SECRET || "secret",
+        process.env.JWT_SECRET || "sanity_app_2024_jwt_secret_key_fallback",
         { expiresIn: "1h" }
     );
     return {
@@ -70,6 +96,13 @@ const googleSignUp = async ({ idToken, accountType }) => {
             profile_pick: user.profile_pick,
             accountType: user.accountType,
             verify_email: user.verify_email,
+            professional: professionalProfile ? {
+                id: professionalProfile.id,
+                servicios_especialistas: professionalProfile.servicios_especialistas,
+                NC_profesional: professionalProfile.NC_profesional,
+                certificados: professionalProfile.certificados,
+                experiencia_laboral: professionalProfile.experiencia_laboral,
+            } : null,
         }
     };
 };

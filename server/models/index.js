@@ -6,6 +6,7 @@ const User = require("./User");
 const Activity = require("./Activity");
 const DiaryEntry = require("./DiaryEntry");
 const EmergencyLog = require("./EmergencyLog");
+const Professional = require("./Professional");
 
 // Leer la URL de conexión (recomendada en producción)
 const DB_URL = process.env.DB_URL;
@@ -56,13 +57,15 @@ async function initializeDatabase() {
   Activity.init(sequelize);
   DiaryEntry.init(sequelize);
   EmergencyLog.init(sequelize);
+  Professional.init(sequelize);
 
   // Asociar modelos
   const models = {
     User,
     Activity,
     DiaryEntry,
-    EmergencyLog
+    EmergencyLog,
+    Professional
   };
 
   Object.values(models).forEach((model) => {

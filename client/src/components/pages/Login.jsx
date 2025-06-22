@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "./../../config/axiosInstance";
+import { saveUserSession } from "../../utils/auth";
 
 export const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -27,46 +28,17 @@ export const LoginPage = () => {
             const data = response.data;
             console.log("Respuesta completa del servidor:", data);
 
-            if (!data.token) {
-                console.error("Datos recibidos sin token:", data);
-                throw new Error("No se recibió el token de autenticación");
-            }
-
-            const sessionData = {
-                accountType: data.accountType,
-                email: data.email,
-                id: data.id,
-                token: data.token
-            };
-
-            console.log("Datos de sesión a guardar:", sessionData);
-
-            if (rememberSession) {
-                localStorage.setItem("userSession", JSON.stringify(sessionData));
-                console.log("Sesión guardada en localStorage");
-            } else {
-                sessionStorage.setItem("userSession", JSON.stringify(sessionData));
-                console.log("Sesión guardada en sessionStorage");
-            }
-
-            // Verificar que los datos se guardaron correctamente
-            const storedSession = JSON.parse(
-                rememberSession
-                    ? localStorage.getItem("userSession")
-                    : sessionStorage.getItem("userSession")
-            );
-            console.log("Datos de sesión guardados:", storedSession);
+            // Guardar datos de sesión usando la utilidad
+            saveUserSession(data.user, rememberSession);
 
             alert(data.message || "Inicio de sesión exitoso");
 
             navigate("/", {
-                state: { accountType: data.accountType },
+                state: { accountType: data.user.accountType },
             });
         } catch (error) {
             console.error("Error en el login:", error);
-            if (error.message === "No se recibió el token de autenticación") {
-                alert("Error en la autenticación: No se recibió el token");
-            } else if (error.response?.status === 400) {
+            if (error.response?.status === 400) {
                 alert("Usuario o contraseña incorrectos");
             } else if (error.response?.status === 403) {
                 alert("Por favor verifica tu correo antes de iniciar sesión");
@@ -75,7 +47,6 @@ export const LoginPage = () => {
             }
         }
     };
-
 
     const handleGoogleResponse = async (response) => {
         const idToken = response.credential;
@@ -86,13 +57,14 @@ export const LoginPage = () => {
 
             if (data.success) {
                 console.log("Respuesta del backend Google", data);
-                const accountType = data.user.accountType;
+                
+                // Guardar datos de sesión usando la utilidad
+                saveUserSession(data.user, false); // Google siempre usa sessionStorage
 
-                sessionStorage.setItem("userSession", JSON.stringify({
-                    googleId: data.user.googleId,
-                    accountType: accountType,
-                    email: data.user.email,
-                }));
+                alert(data.message || "Inicio de sesión exitoso");
+                navigate("/", {
+                    state: { accountType: data.user.accountType },
+                });
 
             } else {
                 console.error('Error en el inicio de sesión con Google (backend):', data.message);

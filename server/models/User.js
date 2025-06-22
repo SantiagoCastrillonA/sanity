@@ -57,6 +57,14 @@ class User extends Model {
           type: DataTypes.STRING(255),
           allowNull: true,
         },
+        resetPasswordToken: {
+          type: DataTypes.STRING,
+          allowNull: true
+        },
+        resetPasswordExpires: {
+          type: DataTypes.DATE,
+          allowNull: true
+        },
         emergency_contact_name: {
           type: DataTypes.STRING(100),
           allowNull: true,
@@ -92,6 +100,11 @@ class User extends Model {
       this.hasMany(models.EmergencyLog, {
         foreignKey: 'user_id',
         as: 'emergencyLogs'
+      });
+      // Relación con el profesional (uno a uno)
+      this.hasOne(models.Professional, {
+        foreignKey: 'user_id',
+        as: 'professional'
       });
     }
 }

@@ -2,7 +2,19 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 
-const loginUser = async (dbInstance, { email, password }) => {
+let dbInstance;
+
+const setDb = (database) => {
+  dbInstance = database;
+};
+
+const loginUser = async ({ email, password }) => {
+  if (!dbInstance || !dbInstance.User) {
+    const error = new Error('El servidor no está completamente inicializado.');
+    error.status = 500;
+    throw error;
+  }
+
   if (!email || !password) {
     const error = new Error("EMAIL_OR_PASSWORD_REQUIRED");
     error.status = 400;
@@ -14,7 +26,7 @@ const loginUser = async (dbInstance, { email, password }) => {
     error.status = 401;
     throw error;
   }
-  const isMatch = await bcrypt.compare(password, user.password_hash);
+  const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     const error = new Error("INVALID_CREDENTIALS");
     error.status = 401;
@@ -24,21 +36,22 @@ const loginUser = async (dbInstance, { email, password }) => {
   return {
     user: {
       id: user.id,
-      username: user.username,
       email: user.email,
-      name: user.name,
       full_name: user.full_name,
+      accountType: user.accountType,
+      verify_email: user.verify_email,
     },
     token,
+    message: "Inicio de sesión exitoso"
   };
 };
 
 const generateToken = (user) => {
   return jwt.sign(
-    { userId: user.id, email: user.email },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN }
+    { id: user.id, email: user.email, accountType: user.accountType },
+    process.env.JWT_SECRET || "sanity_app_2024_jwt_secret_key_fallback",
+    { expiresIn: process.env.JWT_EXPIRES_IN || "1h" }
   );
 };
 
-module.exports = { loginUser };
+module.exports = { loginUser, setDb };

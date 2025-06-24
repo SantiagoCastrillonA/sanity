@@ -57,7 +57,7 @@ export const LoginPage = () => {
 
             if (data.success) {
                 console.log("Respuesta del backend Google", data);
-                
+
                 // Guardar datos de sesión usando la utilidad
                 saveUserSession(data.user, false); // Google siempre usa sessionStorage
 
@@ -93,7 +93,8 @@ export const LoginPage = () => {
                         <input
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
-                            type="email" placeholder='Email' class="bg-amber-50 rounded-4xl w-80 h-16 py-3 pl-14 pr-4 focus:outline-secondary" />
+                            type="email" placeholder='Email' class="bg-white/60
+                             rounded-4xl w-full h-16 py-3 pl-14 pr-4 focus:outline-secondary" />
                         <img class="w-7 h-7 absolute left-5" src={sobreIcon} alt="email" />
                     </div>
                     <div class="flex relative items-center">
@@ -101,7 +102,7 @@ export const LoginPage = () => {
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
                             type={showPassword ? "text" : "password"}
-                            placeholder="Contraseña" class="bg-amber-50 rounded-4xl w-80 h-16 py-3 pl-14 pr-4 focus:outline-secondary" />
+                            placeholder="Contraseña" class="bg-white/60 rounded-4xl w-full h-16 py-3 pl-14 pr-4 focus:outline-secondary" />
                         <img class="w-7 h-7 absolute left-5" src={candadoIcon} alt="ojoCerrado" />
 
                         <img class="w-7 h-7 absolute right-5"
@@ -122,11 +123,11 @@ export const LoginPage = () => {
                     <div>
                         <button class="bg-secondary rounded-4xl w-auto h-auto py-3 px-6 my-4 font-sanity
                         text-neutral-50 text-3xl" onClick={login}>Iniciar Sesión</button>
-                        <p class="font-body-sanity flex gap-2 items-center justify-center">¿Primera vez? <a href="/register" class="text-primary hover:underline">Registrarse</a></p>
-                        <p>o</p>
+                        <p class="font-body-sanity flex gap-2 items-center justify-center">¿Primera vez? <a href="/registration" class="text-primary hover:underline">Registrarse</a></p>
+                        <p>O</p>
                         <div class="flex items-center justify-center mt-4">
                             <div class="flex items-center justify-center h-16">
-                                <div style={{ transform: 'scale(1.3)' }}>
+                                <div className="scale-125 opacity-80">
                                     <GoogleLogin
                                         onSuccess={handleGoogleResponse}
                                         onError={() => alert('Error al iniciar sesión con Google')}

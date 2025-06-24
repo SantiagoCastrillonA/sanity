@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { LoginPage } from './components/pages/Login'
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { RegisterPage } from './components/pages/Register';
+import { RegistrationPage } from './components/pages/Registration';
 
 function App() {
   return (
@@ -9,7 +9,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/registration" element={<RegistrationPage />} />
           <Route path="/" element={
             <div>
               <section className="hero">

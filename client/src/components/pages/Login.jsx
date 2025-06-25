@@ -81,52 +81,52 @@ export const LoginPage = () => {
     };
 
     return (
-        <div class="bg-gradient-to-b from-bg-primary from-1% via-bg-secondary via-20% to-bg-thrid to-100% h-lvh justify-center items-center flex text-center p-4">
+        <div className="bg-gradient-to-b from-bg-primary from-1% via-bg-secondary via-20% to-bg-thrid to-100% h-lvh justify-center items-center flex text-center p-4">
             <div>
-                <div class="flex flex-col gap-2 items-center mb-8">
-                    <img src={Logo} alt="Logo" class="w-30" />
-                    <h1 class="font-sanity font-semibold text-6xl text-primary">Sanity</h1>
-                    <p class="text-primary text-xl font-body-sanity">Es momento de estar bien</p>
+                <div className="flex flex-col gap-2 items-center mb-8">
+                    <img src={Logo} alt="Logo" className="w-30" />
+                    <h1 className="font-sanity font-semibold text-6xl text-primary">Sanity</h1>
+                    <p className="text-primary text-xl font-body-sanity">Es momento de estar bien</p>
                 </div>
-                <form class="flex flex-col justify-center gap-3">
-                    <div class="flex relative items-center" >
+                <form className="flex flex-col justify-center gap-3">
+                    <div className="flex relative items-center" >
                         <input
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
-                            type="email" placeholder='Email' class="bg-white/60
+                            type="email" placeholder='Email' className="bg-white/60
                              rounded-4xl w-full h-16 py-3 pl-14 pr-4 focus:outline-secondary" />
-                        <img class="w-7 h-7 absolute left-5" src={sobreIcon} alt="email" />
+                        <img className="w-7 h-7 absolute left-5" src={sobreIcon} alt="email" />
                     </div>
-                    <div class="flex relative items-center">
+                    <div className="flex relative items-center">
                         <input
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
                             type={showPassword ? "text" : "password"}
-                            placeholder="Contraseña" class="bg-white/60 rounded-4xl w-full h-16 py-3 pl-14 pr-4 focus:outline-secondary" />
-                        <img class="w-7 h-7 absolute left-5" src={candadoIcon} alt="ojoCerrado" />
+                            placeholder="Contraseña" className="bg-white/60 rounded-4xl w-full h-16 py-3 pl-14 pr-4 focus:outline-secondary" />
+                        <img className="w-7 h-7 absolute left-5" src={candadoIcon} alt="ojoCerrado" />
 
-                        <img class="w-7 h-7 absolute right-5"
+                        <img className="w-7 h-7 absolute right-5"
                             src={showPassword ? seePassword : hidePassword}
                             alt="Toggle Password"
                             onClick={() => setShowPassword(!showPassword)}
                         />
                     </div>
-                    <div class="flex gap-2 mt-1 items-center">
+                    <div className="flex gap-2 mt-1 items-center">
                         <input
                             type="checkbox"
                             id="rememberSession"
                             checked={rememberSession}
-                            onChange={(event) => setRememberSession(event.target.checked)} class="w-4 h-4 appearance-none border border-primary checked:bg-primary/50 checked:border-primaryfocus:outline-none" />
-                        <label class="font-body-sanity" htmlFor="rememberSession">Recordarme</label>
-                        <a class="ml-9 font-body-sanity text-primary hover:underline" href="/forgotPassword">¿Olvidó su contrañesa?</a>
+                            onChange={(event) => setRememberSession(event.target.checked)} className="w-4 h-4 appearance-none border border-primary checked:bg-primary/50 checked:border-primaryfocus:outline-none" />
+                        <label className="font-body-sanity" htmlFor="rememberSession">Recordarme</label>
+                        <a className="ml-9 font-body-sanity text-primary hover:underline" href="/forgotPassword">¿Olvidó su contrañesa?</a>
                     </div>
                     <div>
-                        <button class="bg-secondary rounded-4xl w-auto h-auto py-3 px-6 my-4 font-sanity
+                        <button className="bg-secondary rounded-4xl w-auto h-auto py-3 px-6 my-4 font-sanity
                         text-neutral-50 text-3xl" onClick={login}>Iniciar Sesión</button>
-                        <p class="font-body-sanity flex gap-2 items-center justify-center">¿Primera vez? <a href="/registration" class="text-primary hover:underline">Registrarse</a></p>
-                        <p>O</p>
-                        <div class="flex items-center justify-center mt-4">
-                            <div class="flex items-center justify-center h-16">
+                        <p className="font-body-sanity flex gap-2 items-center justify-center">¿Primera vez? <a href="/registration" className="text-primary hover:underline">Registrarse</a></p>
+                        <p className='my-2'>O</p>
+                        <div className="flex items-center justify-center">
+                            <div className="flex items-center justify-center h-13">
                                 <div className="scale-125 opacity-80">
                                     <GoogleLogin
                                         onSuccess={handleGoogleResponse}

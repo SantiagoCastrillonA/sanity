@@ -4,16 +4,12 @@ const cookieParser = require("cookie-parser");
 const initializeDatabase = require("./models/index");
 require("dotenv").config();
 
-
 // Importar rutas
 const userRoutes = require("./routes/userRoutes");
 
-
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",
-];
+const allowedOrigins = ["http://localhost:5173"];
 
 app.use(
   cors({
@@ -26,11 +22,10 @@ app.use(
       }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 
 // Middleware
 app.use(express.json());
@@ -42,32 +37,35 @@ app.use("/api/users", userRoutes);
 // Función para inicializar la base de datos
 const startServer = async () => {
   try {
-
     const db = await initializeDatabase();
 
     // Inyectar la instancia de la base de datos en los controladores y servicios
-    const loginGoogleController = require('./controllers/loginGoogleController');
-    const registerGoogleController = require('./controllers/registerGoogleController');
-    const loginController = require('./controllers/loginController');
-    const registerController = require('./controllers/registerController');
-    const verifyEmailController = require('./controllers/verifyEmailController');
-    const loginGoogleService = require('./services/loginGoogleService');
-    const registerGoogleService = require('./services/registerGoogleService');
-    const loginService = require('./services/loginService');
-    const registerService = require('./services/registerService');
-    const verifyEmailService = require('./services/verifyEmailService');
-    const emailService = require('./services/emailService');
+    const loginGoogleController = require("./controllers/loginGoogleController");
+    const registerGoogleController = require("./controllers/registerGoogleController");
+    const loginController = require("./controllers/loginController");
+    const registerController = require("./controllers/registerController");
+    const verifyEmailController = require("./controllers/verifyEmailController");
+    const profileController = require("./controllers/profileController");
+    const loginGoogleService = require("./services/loginGoogleService");
+    const registerGoogleService = require("./services/registerGoogleService");
+    const loginService = require("./services/loginService");
+    const registerService = require("./services/registerService");
+    const verifyEmailService = require("./services/verifyEmailService");
+    const profileService = require("./services/profileService");
+    const emailService = require("./services/emailService");
 
     loginGoogleController.setDb(db);
     registerGoogleController.setDb(db);
     loginController.setDb(db);
     registerController.setDb(db);
     verifyEmailController.setDb(db);
+    profileController.setDb(db);
     loginGoogleService.setDb(db);
     registerGoogleService.setDb(db);
     loginService.setDb(db);
     registerService.setDb(db);
     verifyEmailService.setDb(db);
+    profileService.setDb(db);
     emailService.setDb(db);
 
     // Conectar servicio de email con servicios que lo necesitan

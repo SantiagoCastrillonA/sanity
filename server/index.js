@@ -46,12 +46,14 @@ const startServer = async () => {
     const registerController = require("./controllers/registerController");
     const verifyEmailController = require("./controllers/verifyEmailController");
     const profileController = require("./controllers/profileController");
+    const passwordResetController = require("./controllers/passwordResetController");
     const loginGoogleService = require("./services/loginGoogleService");
     const registerGoogleService = require("./services/registerGoogleService");
     const loginService = require("./services/loginService");
     const registerService = require("./services/registerService");
     const verifyEmailService = require("./services/verifyEmailService");
     const profileService = require("./services/profileService");
+    const passwordResetService = require("./services/passwordResetService");
     const emailService = require("./services/emailService");
 
     loginGoogleController.setDb(db);
@@ -60,16 +62,19 @@ const startServer = async () => {
     registerController.setDb(db);
     verifyEmailController.setDb(db);
     profileController.setDb(db);
+    passwordResetController.setDb(db);
     loginGoogleService.setDb(db);
     registerGoogleService.setDb(db);
     loginService.setDb(db);
     registerService.setDb(db);
     verifyEmailService.setDb(db);
     profileService.setDb(db);
+    passwordResetService.setDb(db);
     emailService.setDb(db);
 
     // Conectar servicio de email con servicios que lo necesitan
     registerService.setEmailService(emailService);
+    passwordResetController.setEmailService(emailService);
 
     const PORT = process.env.PORT || 3001;
     app.listen(PORT, () => {

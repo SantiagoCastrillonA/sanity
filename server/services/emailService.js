@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 let dbInstance;
 
@@ -9,29 +9,35 @@ const setDb = (database) => {
 // Configurar transporter de email
 const createTransporter = () => {
   return nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || '', // gmail, outlook, etc.
+    service: process.env.EMAIL_SERVICE || "", // gmail, outlook, etc.
     auth: {
-      user: process.env.EMAIL_USER || '',
-      pass: process.env.EMAIL_PASSWORD || '',
+      user: process.env.EMAIL_USER || "",
+      pass: process.env.EMAIL_PASSWORD || "",
     },
   });
 };
 
-const sendVerificationEmail = async (email, verificationToken, username = null) => {
+const sendVerificationEmail = async (
+  email,
+  verificationToken,
+  username = null
+) => {
   try {
     const transporter = createTransporter();
-    
+
     // URL de verificación
-    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
-    
+    const verificationUrl = `${
+      process.env.FRONTEND_URL || "http://localhost:5173"
+    }/verify-email?token=${verificationToken}`;
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Verifica tu cuenta - Sanity',
+      subject: "Verifica tu cuenta - Sanity",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333; text-align: center;">¡Bienvenido a Sanity!</h2>
-          <p>Hola ${username ? `<strong>${username}</strong>` : ''},</p>
+          <p>Hola ${username ? `<strong>${username}</strong>` : ""},</p>
           <p>Gracias por registrarte en nuestra plataforma. Para completar tu registro, necesitas verificar tu dirección de email.</p>
           
           <div style="text-align: center; margin: 30px 0;">
@@ -57,28 +63,27 @@ const sendVerificationEmail = async (email, verificationToken, username = null) 
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email de verificación enviado:', info.messageId);
+    console.log("Email de verificación enviado:", info.messageId);
     return true;
   } catch (error) {
-    console.error('Error enviando email de verificación:', error);
-    throw new Error('Error al enviar email de verificación');
+    console.error("Error enviando email de verificación:", error);
+    throw new Error("Error al enviar email de verificación");
   }
 };
 
-const sendPasswordResetEmail = async (email, resetToken) => {
+const sendPasswordResetEmail = async (email, username, resetUrl) => {
   try {
     const transporter = createTransporter();
-    
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
-    
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Restablecer Contraseña - Sanity',
+      subject: "Restablecer Contraseña - Sanity",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333; text-align: center;">Restablecer Contraseña</h2>
-          <p>Has solicitado restablecer tu contraseña.</p>
+          <p>Hola ${username ? `<strong>${username}</strong>` : ""},</p>
+          <p>Has solicitado restablecer tu contraseña en Sanity.</p>
           
           <div style="text-align: center; margin: 30px 0;">
             <a href="${resetUrl}" 
@@ -90,9 +95,9 @@ const sendPasswordResetEmail = async (email, resetToken) => {
           <p>O copia y pega este enlace en tu navegador:</p>
           <p style="word-break: break-all; color: #666;">${resetUrl}</p>
           
-          <p>Este enlace expirará en 1 hora por seguridad.</p>
+          <p><strong>Este enlace expirará en 1 hora por seguridad.</strong></p>
           
-          <p>Si no solicitaste restablecer tu contraseña, puedes ignorar este email.</p>
+          <p>Si no solicitaste restablecer tu contraseña, puedes ignorar este email de forma segura.</p>
           
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
           <p style="color: #666; font-size: 12px; text-align: center;">
@@ -103,16 +108,16 @@ const sendPasswordResetEmail = async (email, resetToken) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email de restablecimiento enviado:', info.messageId);
+    console.log("Email de restablecimiento enviado:", info.messageId);
     return true;
   } catch (error) {
-    console.error('Error enviando email de restablecimiento:', error);
-    throw new Error('Error al enviar email de restablecimiento');
+    console.error("Error enviando email de restablecimiento:", error);
+    throw new Error("Error al enviar email de restablecimiento");
   }
 };
 
-module.exports = { 
-  sendVerificationEmail, 
-  sendPasswordResetEmail, 
-  setDb 
-}; 
+module.exports = {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  setDb,
+};

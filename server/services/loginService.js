@@ -16,19 +16,24 @@ const loginUser = async ({ email, password }) => {
   }
 
   if (!email || !password) {
-    const error = new Error("EMAIL_OR_PASSWORD_REQUIRED");
+    const error = new Error("Por favor ingresa tu correo y contraseña");
     error.status = 400;
     throw error;
   }
   const user = await dbInstance.User.findOne({ where: { email } });
   if (!user) {
-    const error = new Error("INVALID_CREDENTIALS");
+    const error = new Error("Usuario o contraseña incorrectos");
     error.status = 401;
+    throw error;
+  }
+  if (!user.verify_email) {
+    const error = new Error("Por favor verifica tu correo antes de iniciar sesión. Revisa tu bandeja de entrada");
+    error.status = 403;
     throw error;
   }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    const error = new Error("INVALID_CREDENTIALS");
+    const error = new Error("Usuario o contraseña incorrectos");
     error.status = 401;
     throw error;
   }

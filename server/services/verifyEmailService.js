@@ -12,7 +12,7 @@ const verifyEmail = async (token) => {
   }
 
   if (!token) {
-    const error = new Error('Token no proporcionado');
+    const error = new Error('No se proporcionó el token de verificación.');
     error.status = 400;
     throw error;
   }
@@ -23,7 +23,7 @@ const verifyEmail = async (token) => {
   const user = await dbInstance.User.findOne({ where: { token } });
 
   if (!user) {
-    const error = new Error('Token inválido o expirado');
+    const error = new Error('El enlace de verificación es inválido o ha expirado. Solicita uno nuevo.');
     error.status = 400;
     throw error;
   }
@@ -36,7 +36,7 @@ const verifyEmail = async (token) => {
   await user.save();
 
   return {
-    message: "Correo verificado con éxito",
+    message: "¡Tu correo ha sido verificado exitosamente!",
     user: {
       id: user.id,
       email: user.email,

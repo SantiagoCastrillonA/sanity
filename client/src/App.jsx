@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { LoginPage } from './components/pages/Login'
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { RegistrationPage } from './components/pages/Registration';
+import { VerifyEmail } from './components/pages/VerifyEmail';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registration" element={<RegistrationPage />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/" element={
             <div>
               <section className="hero">

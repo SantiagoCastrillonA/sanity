@@ -38,10 +38,8 @@ export const LoginPage = () => {
             });
         } catch (error) {
             console.error("Error en el login:", error);
-            if (error.response?.status === 400) {
-                alert("Usuario o contraseña incorrectos");
-            } else if (error.response?.status === 403) {
-                alert("Por favor verifica tu correo antes de iniciar sesión");
+            if (error.response && error.response.data && error.response.data.message) {
+                alert(error.response.data.message);
             } else {
                 alert("Ocurrió un error al iniciar sesión");
             }

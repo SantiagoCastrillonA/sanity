@@ -8,7 +8,7 @@ const setDb = (databaseInstance) => {
     dbInstance = databaseInstance;
 };
 
-const googleSignUp = async ({ idToken, accountType, servicios_especialistas, NC_profesional, certificados, experiencia_laboral }) => {
+const googleSignUp = async ({ idToken, accountType, full_name, servicios_especialistas, NC_profesional, certificados, experiencia_laboral }) => {
     if (!dbInstance || !dbInstance.User) {
         const error = new Error('El servidor no está completamente inicializado.');
         error.status = 500;
@@ -24,6 +24,11 @@ const googleSignUp = async ({ idToken, accountType, servicios_especialistas, NC_
         error.status = 400;
         throw error;
     }
+    if (!full_name) {
+        const error = new Error('No se proporcionó el nombre completo.');
+        error.status = 400;
+        throw error;
+    }
     const ticket = await client.verifyIdToken({
         idToken,
         audience: process.env.GOOGLE_CLIENT_ID,
@@ -31,8 +36,6 @@ const googleSignUp = async ({ idToken, accountType, servicios_especialistas, NC_
     const payload = ticket.getPayload();
     const googleId = payload['sub'];
     const email = payload['email'];
-    const givenName = payload['given_name'] || payload['name'];
-    const familyName = payload['family_name'] || '';
     let pictureUrl = payload['picture'];
     const emailVerified = payload['email_verified'];
     if (pictureUrl && pictureUrl.includes('googleusercontent.com')) {
@@ -49,15 +52,30 @@ const googleSignUp = async ({ idToken, accountType, servicios_especialistas, NC_
         error.status = 400;
         throw error;
     }
+
+    console.log("Creando usuario con Google - Datos recibidos:", {
+        googleId,
+        email,
+        full_name,
+        accountType,
+        pictureUrl
+    });
+
     const user = await dbInstance.User.create({
         googleId,
         email,
-        names: givenName,
-        lastnames: familyName,
+        full_name: full_name,
         profile_pick: pictureUrl,
         accountType,
         verify_email: true,
         password: null,
+    });
+
+    console.log("Usuario creado exitosamente:", {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        accountType: user.accountType
     });
 
     // Si es profesional, crear perfil profesional
@@ -91,8 +109,7 @@ const googleSignUp = async ({ idToken, accountType, servicios_especialistas, NC_
             id: user.id,
             googleId: user.googleId,
             email: user.email,
-            names: user.names,
-            lastnames: user.lastnames,
+            full_name: user.full_name,
             profile_pick: user.profile_pick,
             accountType: user.accountType,
             verify_email: user.verify_email,

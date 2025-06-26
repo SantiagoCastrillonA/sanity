@@ -42,7 +42,7 @@ const registerUser = async (userData) => {
   });
 
   if (existingUser) {
-    const error = new Error("USER_ALREADY_EXISTS");
+    const error = new Error("El correo ya está registrado. Por favor, inicia sesión o recupera tu contraseña.");
     error.status = 400;
     throw error;
   }

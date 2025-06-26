@@ -10,8 +10,9 @@ import axiosInstance from "../../config/axiosInstance";
 import usuarioIcon from '../../assets/Icons/usuario.png'
 
 
-export const RegistrationPage = (accountType) => {
+export const RegistrationPage = () => {
     const navigate = useNavigate();
+    const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,13 +25,8 @@ export const RegistrationPage = (accountType) => {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-    // Limpia los campos cada vez que se seleccione un nuevo tipo de cuenta
-    useEffect(() => {
-        setEmail("");
-        setPassword("");
-        setConfirmPassword("");
-    }, [accountType]);
+    const [selectedAccountType, setSelectedAccountType] = useState("");
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
 
     // Actualiza los requisitos de la contraseña en tiempo real
     useEffect(() => {
@@ -44,6 +40,30 @@ export const RegistrationPage = (accountType) => {
 
     const registerUser = async (event) => {
         event.preventDefault();
+
+        // Validar que se haya seleccionado un tipo de cuenta
+        if (!selectedAccountType) {
+            alert("Por favor, selecciona un tipo de cuenta (Estandar o Profesional)");
+            return;
+        }
+
+        // Validar que se haya ingresado el nombre completo
+        if (!fullName.trim()) {
+            alert("Por favor, ingresa tu nombre completo");
+            return;
+        }
+
+        // Validar que se haya ingresado el email
+        if (!email.trim()) {
+            alert("Por favor, ingresa tu email");
+            return;
+        }
+
+        // Validar que se hayan aceptado los términos y condiciones
+        if (!acceptedTerms) {
+            alert("Debes aceptar los términos y condiciones para continuar");
+            return;
+        }
 
         // Validar que todos los requisitos de la contraseña se cumplan
         if (
@@ -69,15 +89,13 @@ export const RegistrationPage = (accountType) => {
         // Enviar datos al backend
         try {
             const response = await axiosInstance.post("/api/users/register", {
-                full_name,
+                full_name: fullName,
                 email,
                 password,
-                accountType
+                accountType: selectedAccountType
             });
 
             const data = response.data;
-            console.log("Respuesta completa del servidor:", data);
-
 
             alert(data.message || "Registro exitoso");
 
@@ -94,16 +112,33 @@ export const RegistrationPage = (accountType) => {
     };
 
     const handleGoogleResponse = async (response) => {
+        // Validar que se haya seleccionado un tipo de cuenta
+        if (!selectedAccountType) {
+            alert("Por favor, selecciona un tipo de cuenta (Estandar o Profesional) antes de continuar con Google");
+            return;
+        }
+
+        // Validar que se hayan aceptado los términos y condiciones
+        if (!acceptedTerms) {
+            alert("Debes aceptar los términos y condiciones para continuar");
+            return;
+        }
+
         const idToken = response.credential;
 
         try {
-            const res = await axiosInstance.post("/api/users/auth/googleSignUp", { idToken });
+            // Decodificar el token de Google para obtener la información del usuario
+            const payload = JSON.parse(atob(idToken.split('.')[1]));
+            const googleFullName = payload.name || payload.given_name + ' ' + payload.family_name;
+
+            const res = await axiosInstance.post("/api/users/auth/googleSignUp", { 
+                idToken,
+                accountType: selectedAccountType,
+                full_name: googleFullName
+            });
             const data = res.data;
 
             if (data.success) {
-                console.log("Respuesta del backend Google", data);
-
-
                 alert(data.message || "Registro exitoso");
                 navigate("/", {
                     state: { accountType: data.user.accountType },
@@ -132,7 +167,10 @@ export const RegistrationPage = (accountType) => {
                 <form className="flex flex-col justify-center gap-3">
                     <div className="flex relative items-center" >
                         <input
-                            placeholder='Nombre Completo' className="bg-white/60 rounded-4xl w-full h-14 py-3 pl-14 pr-4 focus:outline-secondary" />
+                            value={fullName}
+                            onChange={(event) => setFullName(event.target.value)}
+                            placeholder='Nombre Completo' 
+                            className="bg-white/60 rounded-4xl w-full h-14 py-3 pl-14 pr-4 focus:outline-secondary" />
                         <img className="w-7 h-7 absolute left-5" src={usuarioIcon} alt="email" />
                     </div>
                     <div className="flex relative items-center" >
@@ -174,12 +212,32 @@ export const RegistrationPage = (accountType) => {
                     </div>
                     <p>Seleccione el tipo de usuario</p>
                     <div className="flex flex-row justify-between bg-white/60 rounded-4xl w-full h-14 p-2 gap-2">
-                        <button className="bg-primary rounded-4xl py-2 px-10 font-sanity text-neutral-50" onClick={registerUser}>Estandar</button>
-                        <button className="bg-primary rounded-4xl py-2 px-12 font-sanity text-neutral-50" onClick={registerUser}>Profesional</button>
+                        <button 
+                            type="button"
+                            className={`rounded-4xl py-2 px-10 font-sanity text-neutral-50 transition-all duration-200 ${
+                                selectedAccountType === "Usuario" 
+                                    ? "bg-secondary shadow-lg scale-105" 
+                                    : "bg-primary hover:bg-primary/80"
+                            }`} 
+                            onClick={() => setSelectedAccountType("Usuario")}
+                        >
+                            Estandar
+                        </button>
+                        <button 
+                            type="button"
+                            className={`rounded-4xl py-2 px-12 font-sanity text-neutral-50 transition-all duration-200 ${
+                                selectedAccountType === "Profesional" 
+                                    ? "bg-secondary shadow-lg scale-105" 
+                                    : "bg-primary hover:bg-primary/80"
+                            }`} 
+                            onClick={() => setSelectedAccountType("Profesional")}
+                        >
+                            Profesional
+                        </button>
                     </div>
                     {/* Muestra los requisitos solo si el input está activo */}
                     {isPasswordFocused && (
-                        <ul className="w-40 h-auto absolute bg-gray-300 rounded-sm p-1">
+                        <ul className="w-40 h-auto absolute top-44 bg-gray-300 rounded-sm p-1">
                             <li
                                 className={`w-full text-sm ${passwordRequirements.length ? "text-green-800" : "text-red-800"}`}
                             >
@@ -206,11 +264,15 @@ export const RegistrationPage = (accountType) => {
                         <input
                             type="checkbox"
                             id="terms"
-                            className="w-4 h-4 appearance-none border border-primary checked:bg-primary/50 checked:border-primaryfocus:outline-none" />
-                        <p className="font-body-sanity flex gap-2 items-center justify-center"><a href="/terms" className="text-primary hover:underline">Aceptar terminos y condiciones</a></p>
+                            checked={acceptedTerms}
+                            onChange={(e) => setAcceptedTerms(e.target.checked)}
+                            className="w-4 h-4 appearance-none border border-primary checked:bg-primary/50 checked:border-primary focus:outline-none cursor-pointer" />
+                        <p className="font-body-sanity flex gap-2 items-center justify-center">
+                            <a href="/terms" className="text-primary hover:underline">Aceptar terminos y condiciones</a>
+                        </p>
                     </div>
                     <div>
-                        <button className="bg-secondary rounded-4xl w-auto h-auto py-3 px-6 font-sanity
+                        <button className="bg-secondary rounded-4xl w-auto h-auto py-2 px-6 font-sanity
                         text-neutral-50 text-3xl" onClick={registerUser}>Registrarse</button>
                         <p className='my-2'>O</p>
                         <div className="flex flex-col items-center justify-center gap-4">

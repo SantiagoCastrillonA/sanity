@@ -15,7 +15,7 @@ const googleSignIn = async ({ idToken }) => {
         throw error;
     }
     if (!idToken) {
-        const error = new Error('No se proporcionó token de Google.');
+        const error = new Error('No se recibió el token de Google. Intenta nuevamente.');
         error.status = 400;
         throw error;
     }
@@ -34,7 +34,7 @@ const googleSignIn = async ({ idToken }) => {
         pictureUrl = pictureUrl.split('=')[0];
     }
     if (!emailVerified) {
-        const error = new Error('El correo electrónico de Google no está verificado.');
+        const error = new Error('Tu correo de Google no está verificado. Por favor, verifica tu cuenta de Google antes de continuar.');
         error.status = 400;
         throw error;
     }
@@ -50,7 +50,7 @@ const googleSignIn = async ({ idToken }) => {
                 verify_email: true,
             });
         } else {
-            const error = new Error('Correo no registrado');
+            const error = new Error('El correo no está registrado. Por favor, regístrate primero.');
             error.status = 400;
             throw error;
         }

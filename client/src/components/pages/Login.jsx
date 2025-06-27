@@ -14,11 +14,10 @@ export const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [rememberSession, setRememberSession] = useState(false);
+    const [isLoginClicked, setIsLoginClicked] = useState(false);
     const navigate = useNavigate();
 
     const login = async (event) => {
-        event.preventDefault();
-
         try {
             const response = await axiosInstance.post("/api/users/login", {
                 email,
@@ -81,9 +80,9 @@ export const LoginPage = () => {
     return (
         <div className="bg-gradient-to-b from-bg-primary from-1% via-bg-secondary via-20% to-bg-thrid to-100% h-lvh justify-center items-center flex text-center p-4">
             <div>
-                <div className="flex flex-col gap-2 items-center mb-8">
-                    <img src={Logo} alt="Logo" className="w-30" />
-                    <h1 className="font-sanity font-semibold text-6xl text-primary">Sanity</h1>
+                <div className="flex flex-col gap-2 items-center mb-5">
+                    <img src={Logo} alt="Logo" className="w-20" />
+                    <h1 className="font-sanity font-semibold text-4xl text-primary">Sanity</h1>
                     <p className="text-primary text-xl font-body-sanity">Es momento de estar bien</p>
                 </div>
                 <form className="flex flex-col justify-center gap-3">
@@ -92,7 +91,7 @@ export const LoginPage = () => {
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
                             type="email" placeholder='Email' className="bg-white/60
-                             rounded-4xl w-full h-16 py-3 pl-14 pr-4 focus:outline-secondary" />
+                             rounded-4xl w-full h-14 py-3 pl-14 pr-4 focus:outline-secondary" />
                         <img className="w-7 h-7 absolute left-5" src={sobreIcon} alt="email" />
                     </div>
                     <div className="flex relative items-center">
@@ -100,7 +99,7 @@ export const LoginPage = () => {
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
                             type={showPassword ? "text" : "password"}
-                            placeholder="Contraseña" className="bg-white/60 rounded-4xl w-full h-16 py-3 pl-14 pr-4 focus:outline-secondary" />
+                            placeholder="Contraseña" className="bg-white/60 rounded-4xl w-full h-14 py-3 pl-14 pr-4 focus:outline-secondary" />
                         <img className="w-7 h-7 absolute left-5" src={candadoIcon} alt="ojoCerrado" />
 
                         <img className="w-7 h-7 absolute right-5"
@@ -109,19 +108,29 @@ export const LoginPage = () => {
                             onClick={() => setShowPassword(!showPassword)}
                         />
                     </div>
-                    <div className="flex gap-2 mt-1 items-center">
+                    <div className="flex gap-2 items-center">
                         <input
                             type="checkbox"
                             id="rememberSession"
                             checked={rememberSession}
                             onChange={(event) => setRememberSession(event.target.checked)} className="w-4 h-4 appearance-none border border-primary checked:bg-primary/50 checked:border-primaryfocus:outline-none" />
                         <label className="font-body-sanity" htmlFor="rememberSession">Recordarme</label>
-                        <a className="ml-9 font-body-sanity text-primary hover:underline" href="/forgotPassword">¿Olvidó su contrañesa?</a>
+                        <a className="ml-14 font-body-sanity text-primary hover:underline" href="/forgotPassword">¿Olvidó su contrañesa?</a>
                     </div>
                     <div>
-                        <button className="bg-secondary rounded-4xl w-auto h-auto py-3 px-6 my-4 font-sanity
-                        text-neutral-50 text-3xl" onClick={login}>Iniciar Sesión</button>
-                        <p className="font-body-sanity flex gap-2 items-center justify-center">¿Primera vez? <a href="/registration" className="text-primary hover:underline">Registrarse</a></p>
+                        <button 
+                            type="button"
+                            className={`bg-secondary rounded-4xl w-60 h-12 font-sanity text-neutral-50 text-2xl transition-all duration-200 hover:bg-secondary/80 ${
+                                isLoginClicked ? "shadow-lg scale-105" : ""
+                            }`} 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setIsLoginClicked(true);
+                                login(e);
+                            }}
+                        >
+                            Iniciar Sesión
+                        </button>
                         <p className='my-2'>O</p>
                         <div className="flex items-center justify-center">
                             <div className="flex items-center justify-center h-13">
@@ -137,6 +146,7 @@ export const LoginPage = () => {
                                 </div>
                             </div>
                         </div>
+                        <p className="font-body-sanity flex gap-2 items-center justify-center my-4">¿Primera vez? <a href="/registration" className="text-primary hover:underline">Registrarse</a></p>
                     </div>
                 </form>
             </div>

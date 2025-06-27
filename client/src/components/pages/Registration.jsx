@@ -27,6 +27,7 @@ export const RegistrationPage = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [selectedAccountType, setSelectedAccountType] = useState("");
     const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [isRegisterClicked, setIsRegisterClicked] = useState(false);
 
     // Actualiza los requisitos de la contraseña en tiempo real
     useEffect(() => {
@@ -39,8 +40,6 @@ export const RegistrationPage = () => {
     }, [password]);
 
     const registerUser = async (event) => {
-        event.preventDefault();
-
         // Validar que se haya seleccionado un tipo de cuenta
         if (!selectedAccountType) {
             alert("Por favor, selecciona un tipo de cuenta (Estandar o Profesional)");
@@ -131,7 +130,7 @@ export const RegistrationPage = () => {
             const payload = JSON.parse(atob(idToken.split('.')[1]));
             const googleFullName = payload.name || payload.given_name + ' ' + payload.family_name;
 
-            const res = await axiosInstance.post("/api/users/auth/googleSignUp", { 
+            const res = await axiosInstance.post("/api/users/auth/googleSignUp", {
                 idToken,
                 accountType: selectedAccountType,
                 full_name: googleFullName
@@ -169,7 +168,7 @@ export const RegistrationPage = () => {
                         <input
                             value={fullName}
                             onChange={(event) => setFullName(event.target.value)}
-                            placeholder='Nombre Completo' 
+                            placeholder='Nombre Completo'
                             className="bg-white/60 rounded-4xl w-full h-14 py-3 pl-14 pr-4 focus:outline-secondary" />
                         <img className="w-7 h-7 absolute left-5" src={usuarioIcon} alt="email" />
                     </div>
@@ -180,6 +179,33 @@ export const RegistrationPage = () => {
                             type="email" placeholder='Email' className="bg-white/60 rounded-4xl w-full h-14 py-3 pl-14 pr-4 focus:outline-secondary" />
                         <img className="w-7 h-7 absolute left-5" src={sobreIcon} alt="email" />
                     </div>
+
+                    {/* Muestra los requisitos solo si el input está activo */}
+                    {isPasswordFocused && (
+                        <ul className="w-full bg-gray-300 rounded-sm p-2 mb-2">
+                            <li
+                                className={`w-full text-sm ${passwordRequirements.length ? "text-green-800" : "text-red-800"}`}
+                            >
+                                Al menos 8 caracteres
+                            </li>
+                            <li
+                                className={`w-full text-sm ${passwordRequirements.uppercase ? "text-green-800" : "text-red-800"}`}
+                            >
+                                Al menos una letra mayúscula
+                            </li>
+                            <li
+                                className={`w-full text-sm ${passwordRequirements.number ? "text-green-800" : "text-red-800"}`}
+                            >
+                                Al menos un número
+                            </li>
+                            <li
+                                className={`w-full text-sm ${passwordRequirements.specialChar ? "text-green-800" : "text-red-800"}`}
+                            >
+                                Al menos un carácter especial (@$!%*?&)
+                            </li>
+                        </ul>
+                    )}
+
                     <div className="flex relative items-center">
                         <input
                             value={password}
@@ -212,54 +238,27 @@ export const RegistrationPage = () => {
                     </div>
                     <p>Seleccione el tipo de usuario</p>
                     <div className="flex flex-row justify-between bg-white/60 rounded-4xl w-full h-14 p-2 gap-2">
-                        <button 
+                        <button
                             type="button"
-                            className={`rounded-4xl py-2 px-10 font-sanity text-neutral-50 transition-all duration-200 ${
-                                selectedAccountType === "Usuario" 
-                                    ? "bg-secondary shadow-lg scale-105" 
+                            className={`rounded-4xl py-2 px-10 font-sanity text-neutral-50 transition-all duration-200 ${selectedAccountType === "Usuario"
+                                    ? "bg-secondary shadow-lg scale-105"
                                     : "bg-primary hover:bg-primary/80"
-                            }`} 
+                                }`}
                             onClick={() => setSelectedAccountType("Usuario")}
                         >
                             Estandar
                         </button>
-                        <button 
+                        <button
                             type="button"
-                            className={`rounded-4xl py-2 px-12 font-sanity text-neutral-50 transition-all duration-200 ${
-                                selectedAccountType === "Profesional" 
-                                    ? "bg-secondary shadow-lg scale-105" 
+                            className={`rounded-4xl py-2 px-12 font-sanity text-neutral-50 transition-all duration-200 ${selectedAccountType === "Profesional"
+                                    ? "bg-secondary shadow-lg scale-105"
                                     : "bg-primary hover:bg-primary/80"
-                            }`} 
+                                }`}
                             onClick={() => setSelectedAccountType("Profesional")}
                         >
                             Profesional
                         </button>
                     </div>
-                    {/* Muestra los requisitos solo si el input está activo */}
-                    {isPasswordFocused && (
-                        <ul className="w-40 h-auto absolute top-44 bg-gray-300 rounded-sm p-1">
-                            <li
-                                className={`w-full text-sm ${passwordRequirements.length ? "text-green-800" : "text-red-800"}`}
-                            >
-                                Al menos 8 caracteres
-                            </li>
-                            <li
-                                className={`w-full text-sm ${passwordRequirements.uppercase ? "text-green-800" : "text-red-800"}`}
-                            >
-                                Al menos una letra mayúscula
-                            </li>
-                            <li
-                                className={`w-full text-sm ${passwordRequirements.number ? "text-green-800" : "text-red-800"}`}
-                            >
-                                Al menos un número
-                            </li>
-                            <li
-                                className={`w-full text-sm ${passwordRequirements.specialChar ? "text-green-800" : "text-red-800"}`}
-                            >
-                                Al menos un carácter especial (@$!%*?&)
-                            </li>
-                        </ul>
-                    )}
                     <div className="flex gap-2 mt-1 items-center">
                         <input
                             type="checkbox"
@@ -272,8 +271,19 @@ export const RegistrationPage = () => {
                         </p>
                     </div>
                     <div>
-                        <button className="bg-secondary rounded-4xl w-auto h-auto py-2 px-6 font-sanity
-                        text-neutral-50 text-3xl" onClick={registerUser}>Registrarse</button>
+                        <button 
+                            type="button"
+                            className={`bg-secondary rounded-4xl w-60 h-12 font-sanity text-neutral-50 text-2xl transition-all duration-200 hover:bg-secondary/80 ${
+                                isRegisterClicked ? "shadow-lg scale-105" : ""
+                            }`} 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setIsRegisterClicked(true);
+                                registerUser(e);
+                            }}
+                        >
+                            Registrarse
+                        </button>
                         <p className='my-2'>O</p>
                         <div className="flex flex-col items-center justify-center gap-4">
                             <div className="scale-125 opacity-80">
